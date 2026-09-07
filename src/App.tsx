@@ -49,7 +49,13 @@ export default function App() {
 
   // Endpoint configuration for GitHub Pages / remote hosting
   const [customApiUrl, setCustomApiUrl] = useState<string>(() => {
-    return localStorage.getItem('gemma_custom_api_url') || '';
+    const saved = localStorage.getItem('gemma_custom_api_url');
+    if (saved !== null) return saved;
+    // Default automatically to public Codespace endpoint on GitHub Pages domain
+    if (typeof window !== 'undefined' && window.location.hostname.endsWith('github.io')) {
+      return 'https://literate-space-lamp-g4px7pr4j4r5cvvr-8080.app.github.dev/v1/chat/completions';
+    }
+    return '';
   });
   const [customApiKey, setCustomApiKey] = useState<string>(() => {
     return localStorage.getItem('gemma_custom_api_key') || '';
