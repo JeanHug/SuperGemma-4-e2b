@@ -14,10 +14,6 @@ import {
   User,
   Lightbulb,
   ArrowDown,
-  Settings,
-  X,
-  Globe,
-  ExternalLink,
 } from 'lucide-react';
 import { MarkdownRenderer } from './components/MarkdownRenderer';
 
@@ -48,29 +44,14 @@ export default function App() {
   const [purgeNotice, setPurgeNotice] = useState<string | null>(null);
 
   // Endpoint configuration for GitHub Pages / remote hosting
-  const [customApiUrl, setCustomApiUrl] = useState<string>(() => {
-    const saved = localStorage.getItem('gemma_custom_api_url');
-    if (saved !== null) return saved;
+  const [customApiUrl] = useState<string>(() => {
     // Default automatically to public Codespace endpoint on GitHub Pages domain
     if (typeof window !== 'undefined' && window.location.hostname.endsWith('github.io')) {
       return 'https://literate-space-lamp-g4px7pr4j4r5cvvr-8080.app.github.dev/v1/chat/completions';
     }
     return '';
   });
-  const [customApiKey, setCustomApiKey] = useState<string>(() => {
-    return localStorage.getItem('gemma_custom_api_key') || '';
-  });
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-
-  const saveSettings = (url: string, key: string) => {
-    setCustomApiUrl(url);
-    setCustomApiKey(key);
-    localStorage.setItem('gemma_custom_api_url', url.trim());
-    localStorage.setItem('gemma_custom_api_key', key.trim());
-    setIsSettingsOpen(false);
-    setPurgeNotice('Paramètres de connexion sauvegardés');
-    setTimeout(() => setPurgeNotice(null), 2500);
-  };
+  const [customApiKey] = useState<string>('');
 
   // Tracks which thinking accordions are expanded (defaults to collapsed once completed)
   const [expandedThinking, setExpandedThinking] = useState<Record<string, boolean>>({});
@@ -572,30 +553,6 @@ export default function App() {
                 purger KV
               </span>
             </button>
-
-            <div className="h-6 w-px bg-neutral-200" />
-
-            {/* Settings & Remote Connection Button */}
-            <button
-              type="button"
-              onClick={() => setIsSettingsOpen(true)}
-              title="Configurer l'endpoint d'inférence (Codespace / GitHub Pages / Serveur distant)"
-              className="flex flex-col items-center justify-center text-center group cursor-pointer transition-opacity"
-            >
-              <div className="flex items-center space-x-1">
-                <Settings className="w-3 h-3 text-neutral-950 group-hover:rotate-45 transition-transform" />
-                <span className="text-neutral-950 font-bold text-xs tracking-tight">
-                  API
-                </span>
-              </div>
-              <span className="text-neutral-400 font-mono text-[11px] sm:text-xs mt-0.5 whitespace-nowrap group-hover:text-neutral-700 transition-colors flex items-center space-x-1">
-                {customApiUrl ? (
-                  <span className="text-emerald-600 font-semibold">Distant</span>
-                ) : (
-                  <span>Auto</span>
-                )}
-              </span>
-            </button>
           </div>
         </div>
 
@@ -607,98 +564,6 @@ export default function App() {
           </div>
         )}
       </header>
-
-      {/* Settings Modal */}
-      {isSettingsOpen && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-neutral-200 shadow-xl max-w-lg w-full p-6 space-y-5 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
-              <div className="flex items-center space-x-2">
-                <Settings className="w-4 h-4 text-neutral-950" />
-                <h3 className="text-sm font-bold text-neutral-950">Configuration de l'Inférence</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsSettingsOpen(false)}
-                className="p-1 rounded-lg hover:bg-neutral-100 text-neutral-400 hover:text-neutral-900 transition-colors cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const form = e.target as HTMLFormElement;
-                const url = (form.elements.namedItem('apiUrl') as HTMLInputElement).value;
-                const key = (form.elements.namedItem('apiKey') as HTMLInputElement).value;
-                saveSettings(url, key);
-              }}
-              className="space-y-4"
-            >
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-neutral-900 flex items-center justify-between">
-                  <span>URL du serveur d'inférence (Endpoint)</span>
-                  <span className="text-[10px] font-mono text-neutral-400 font-normal">Optionnel</span>
-                </label>
-                <input
-                  type="text"
-                  name="apiUrl"
-                  defaultValue={customApiUrl}
-                  placeholder="Laisser vide pour mode Auto (/api/chat/stream)"
-                  className="w-full px-3 py-2 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-neutral-950 font-mono"
-                />
-                <p className="text-[11px] text-neutral-500 leading-relaxed">
-                  Sur <strong>GitHub Pages</strong>, indiquez l'URL publique de votre Codespace (ex: <code className="bg-neutral-100 px-1 py-0.5 rounded text-[10px]">https://&lt;codespace&gt;-8080.app.github.dev/v1/chat/completions</code>) ou l'adresse de votre backend distant.
-                </p>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-neutral-900 flex items-center justify-between">
-                  <span>Token d'authentification / Clé API</span>
-                  <span className="text-[10px] font-mono text-neutral-400 font-normal">Optionnel</span>
-                </label>
-                <input
-                  type="password"
-                  name="apiKey"
-                  defaultValue={customApiKey}
-                  placeholder="Bearer token (si votre endpoint est protégé)"
-                  className="w-full px-3 py-2 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-neutral-950 font-mono"
-                />
-              </div>
-
-              <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-3 space-y-2 text-xs text-neutral-600">
-                <div className="font-semibold text-neutral-900 flex items-center space-x-1.5">
-                  <Globe className="w-3.5 h-3.5 text-neutral-700" />
-                  <span>Déploiement GitHub Pages</span>
-                </div>
-                <ol className="list-decimal list-inside space-y-1 text-[11px] text-neutral-500">
-                  <li>Poussez le code sur votre dépôt GitHub vide (la branche <code className="font-mono">main</code>).</li>
-                  <li>Le workflow GitHub Actions inclus déploie le site automatiquement.</li>
-                  <li>Dans les paramètres du dépôt GitHub, activez <em>Settings &gt; Pages &gt; GitHub Actions</em>.</li>
-                  <li>Rendez le port 8080 public dans votre Codespace (<code className="font-mono">gh codespace ports visibility 8080:public</code>) pour que GitHub Pages s'y connecte directement.</li>
-                </ol>
-              </div>
-
-              <div className="flex items-center justify-end space-x-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => saveSettings('', '')}
-                  className="px-3 py-1.5 text-xs text-neutral-600 hover:text-neutral-900 font-medium cursor-pointer"
-                >
-                  Réinitialiser (Auto)
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-1.5 bg-neutral-950 text-white rounded-xl text-xs font-semibold hover:bg-neutral-800 transition-colors cursor-pointer"
-                >
-                  Enregistrer
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* Main Container */}
       <main className="flex-1 max-w-3xl w-full mx-auto flex flex-col p-4 sm:p-6 space-y-6 relative">
