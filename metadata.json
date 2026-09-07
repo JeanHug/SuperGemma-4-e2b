@@ -1,0 +1,6 @@
+{
+  "name": "Environnement AI Studio",
+  "description": "Interface conversationnelle ultra-rapide pour Gemma 4 Edge avec streaming direct et analyse du raisonnement.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
