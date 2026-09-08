@@ -45,9 +45,9 @@ export default function App() {
 
   // Endpoint configuration for GitHub Pages / remote hosting
   const [customApiUrl] = useState<string>(() => {
-    // Default automatically to public Codespace endpoint on GitHub Pages domain
+    // Default automatically to public ngrok inference endpoint on GitHub Pages domain
     if (typeof window !== 'undefined' && window.location.hostname.endsWith('github.io')) {
-      return 'https://literate-space-lamp-g4px7pr4j4r5cvvr-8080.app.github.dev/v1/chat/completions';
+      return 'https://playable-myong-noncolorably.ngrok-free.dev/v1/chat/completions';
     }
     return '';
   });
@@ -267,6 +267,7 @@ export default function App() {
 
       const requestHeaders: Record<string, string> = {
         'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
       };
       if (customApiKey && customApiKey.trim()) {
         requestHeaders['Authorization'] = `Bearer ${customApiKey.trim()}`;
@@ -343,7 +344,8 @@ export default function App() {
                     generationStartTimeRef.current = now;
                     setMetrics((m) => ({ ...m, latency: lat, duration: 0 }));
                   }
-                  tokenCountRef.current += 1;
+                  const addedTokens = Math.max(1, Math.round(reasoningDelta.length / 3.5));
+                  tokenCountRef.current += addedTokens;
 
                   setMessages((prev) =>
                     prev.map((msg) =>
@@ -366,7 +368,8 @@ export default function App() {
                     generationStartTimeRef.current = now;
                     setMetrics((m) => ({ ...m, latency: lat, duration: 0 }));
                   }
-                  tokenCountRef.current += 1;
+                  const addedTokens = Math.max(1, Math.round(contentDelta.length / 3.5));
+                  tokenCountRef.current += addedTokens;
 
                   setMessages((prev) =>
                     prev.map((msg) =>
@@ -386,7 +389,8 @@ export default function App() {
                   generationStartTimeRef.current = now;
                   setMetrics((m) => ({ ...m, latency: lat, duration: 0 }));
                 }
-                tokenCountRef.current += 1;
+                const addedTokens = Math.max(1, Math.round((event.delta || '').length / 3.5));
+                tokenCountRef.current += addedTokens;
 
                 setMessages((prev) =>
                   prev.map((msg) =>
@@ -408,7 +412,8 @@ export default function App() {
                   generationStartTimeRef.current = now;
                   setMetrics((m) => ({ ...m, latency: lat, duration: 0 }));
                 }
-                tokenCountRef.current += 1;
+                const addedTokens = Math.max(1, Math.round((event.delta || '').length / 3.5));
+                tokenCountRef.current += addedTokens;
 
                 setMessages((prev) =>
                   prev.map((msg) =>
@@ -418,11 +423,19 @@ export default function App() {
                   )
                 );
               } else if (event.type === 'timings') {
-                if (event.timings?.predicted_per_second) {
+                if (event.timings) {
+                  const tpsVal = event.timings.predicted_per_second || 0;
+                  const promptMs = Math.round(event.timings.prompt_ms || 0);
+                  const predMs = Math.round(event.timings.predicted_ms || 0);
+                  const predN = event.timings.predicted_n || tokenCountRef.current;
+
+                  tokenCountRef.current = predN;
                   setMetrics((m) => ({
                     ...m,
-                    tps: event.timings.predicted_per_second,
-                    latency: m.latency || Math.round(event.timings.prompt_ms || 0),
+                    tps: tpsVal > 0 ? tpsVal : m.tps,
+                    duration: predMs > 0 ? predMs : m.duration,
+                    tokens: predN,
+                    latency: promptMs > 0 ? promptMs : m.latency,
                   }));
                 }
               } else if (event.type === 'error') {

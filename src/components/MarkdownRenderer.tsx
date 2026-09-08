@@ -3,13 +3,89 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
-import { Copy, Check, Terminal, Sigma } from 'lucide-react';
+import { Copy, Check, Terminal, Sigma, Eye, Code } from 'lucide-react';
 import katex from 'katex';
 
 interface MarkdownRendererProps {
   content: string;
   isThinking?: boolean;
 }
+
+const SVGBlock: React.FC<{ codeString: string }> = ({ codeString }) => {
+  const [showCode, setShowCode] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(codeString);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="my-4 rounded-xl border border-neutral-300 dark:border-neutral-800 shadow-sm overflow-hidden bg-white dark:bg-neutral-900 max-w-full">
+      {/* Black top bar with rounded top corners optimized for compact mobile and desktop display */}
+      <div className="bg-neutral-950 text-white px-3 py-2 sm:px-4 sm:py-2.5 flex items-center justify-between text-xs font-sans rounded-t-xl gap-2 overflow-x-auto select-none border-b border-neutral-800">
+        <div className="flex items-center space-x-1.5 font-medium tracking-tight whitespace-nowrap shrink-0">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block shrink-0"></span>
+          <span className="text-white font-semibold">Vectorielle</span>
+          <span className="text-neutral-400 font-normal">SVG</span>
+        </div>
+        <div className="flex items-center space-x-1.5 whitespace-nowrap shrink-0">
+          <button
+            type="button"
+            onClick={() => setShowCode(!showCode)}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white transition-all cursor-pointer text-[11px] font-medium"
+            title={showCode ? "Voir l'aperçu" : "Voir le code"}
+          >
+            {showCode ? (
+              <>
+                <Eye className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span>Voir</span>
+              </>
+            ) : (
+              <>
+                <Code className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                <span>Code</span>
+              </>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={handleCopyCode}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white transition-all cursor-pointer text-[11px] font-medium"
+            title="Copier le code SVG"
+          >
+            {copied ? (
+              <>
+                <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span className="text-emerald-400 font-semibold">Copié</span>
+              </>
+            ) : (
+              <>
+                <Copy className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                <span>Copier</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Content area */}
+      {showCode ? (
+        <div className="bg-neutral-900 text-neutral-100 p-3 sm:p-4 overflow-x-auto rounded-b-xl font-mono text-xs leading-relaxed max-w-full">
+          <pre className="whitespace-pre-wrap break-all"><code>{codeString}</code></pre>
+        </div>
+      ) : (
+        <div className="p-4 sm:p-6 bg-white dark:bg-neutral-900 rounded-b-xl flex justify-center items-center overflow-auto min-h-[140px] max-h-[420px] max-w-full">
+          <div
+            className="max-w-full flex justify-center items-center overflow-hidden"
+            dangerouslySetInnerHTML={{ __html: codeString }}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Pre-process math expressions to ensure all forms of LaTeX delimiters (\[ \], \( \), $$ $$, $ $) are captured
 function formatMathDelimiters(text: string): string {
@@ -154,6 +230,10 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, isT
               } catch {
                 // Fallback to regular code block
               }
+            }
+
+            if (lang === 'svg' || codeString.trim().toLowerCase().includes('<svg')) {
+              return <SVGBlock codeString={codeString} />;
             }
 
             if (isInline) {
