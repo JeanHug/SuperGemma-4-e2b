@@ -1,9 +1,9 @@
 {
-  "url": "https://recipe-sofa-personally-connector.trycloudflare.com/v1/chat/completions",
-  "base_url": "https://recipe-sofa-personally-connector.trycloudflare.com",
+  "url": "https://regards-gentle-offer-sarah.trycloudflare.com/v1/chat/completions",
+  "base_url": "https://regards-gentle-offer-sarah.trycloudflare.com",
   "status": "online",
   "model": "gemma-4-E2B-it-Q4_K_M",
   "context_size": 8192,
   "threads": 2,
-  "updated_at": "2026-09-08T20:07:06Z"
+  "updated_at": "2026-09-08T22:16:16Z"
 }
