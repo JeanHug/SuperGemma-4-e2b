@@ -21,6 +21,7 @@ fi
 # Start high-speed Gemma server with optimized CPU pinning and 8192 context window
 nohup /workspaces/SuperGemma-4-e2b/llama.cpp/build/bin/llama-server \
   -m /workspaces/SuperGemma-4-e2b/models/gemma-4-E2B-it-Q4_K_M.gguf \
+  --load-mode none \
   --host 0.0.0.0 \
   --port 8080 \
   -c 8192 \
