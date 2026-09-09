@@ -28,9 +28,7 @@ nohup /workspaces/SuperGemma-4-e2b/llama.cpp/build/bin/llama-server \
   --context-shift \
   --timeout 600 \
   -t 2 \
-  -C 5 \
   -tb 4 \
-  -Cb f \
   -np 1 \
   -b 512 \
   -ub 512 \

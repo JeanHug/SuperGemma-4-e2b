@@ -1,9 +1,9 @@
 {
-  "url": "https://way-wales-published-fluid.trycloudflare.com/v1/chat/completions",
-  "base_url": "https://way-wales-published-fluid.trycloudflare.com",
+  "url": "https://parish-earlier-ssl-ata.trycloudflare.com/v1/chat/completions",
+  "base_url": "https://parish-earlier-ssl-ata.trycloudflare.com",
   "status": "online",
   "model": "gemma-4-E2B-it-Q4_K_M",
   "context_size": 8192,
   "threads": 2,
-  "updated_at": "2026-09-09T05:51:12Z"
+  "updated_at": "2026-09-09T05:52:52Z"
 }
